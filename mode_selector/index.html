@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap');
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: transparent; font-family: 'Sora', sans-serif; color: #B6C2E2; }
+#wrap { padding: 16px 0 26px; }
+.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+
+.card {
+  position: relative; display: flex; flex-direction: column; align-items: center; text-align: center;
+  min-height: 230px; padding: 34px 18px 28px; border-radius: 20px; cursor: pointer;
+  font: inherit; color: inherit; background: rgba(255,255,255,.04);
+  border: 1px solid rgba(var(--c), .32); opacity: .85;
+  transition: transform .3s, box-shadow .3s, border-color .3s, opacity .3s, background .3s;
+}
+.card:hover { transform: translateY(-6px); opacity: 1; border-color: rgba(var(--c), .85);
+  box-shadow: 0 14px 30px -8px rgba(var(--c), .45); }
+.card:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.card.sel { opacity: 1; transform: scale(1.03); background: rgba(var(--c), .10); border-color: rgb(var(--c));
+  box-shadow: 0 0 0 1px rgb(var(--c)), 0 12px 34px -8px rgba(var(--c), .75), inset 0 0 34px rgba(var(--c), .14); }
+
+.ic { width: 64px; height: 64px; display: grid; place-items: center; margin-bottom: 18px; border-radius: 18px;
+  color: rgb(var(--c)); background: rgba(var(--c), .12); border: 1px solid rgba(var(--c), .42); }
+.card.sel .ic { background: rgba(var(--c), .22); box-shadow: 0 0 22px rgba(var(--c), .45); }
+.t { font-weight: 700; font-size: 1.35rem; color: #fff; margin-bottom: 10px; }
+.d { font-size: 1.02rem; line-height: 1.55; color: #B6C2E2; max-width: 210px; }
+
+.ck { position: absolute; top: 14px; right: 14px; width: 24px; height: 24px; border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,.25); display: grid; place-items: center; color: transparent; transition: all .25s; }
+.card.sel .ck { background: rgb(var(--c)); border-color: rgb(var(--c)); color: #050714; box-shadow: 0 0 12px rgba(var(--c), .8); }
+
+@media (max-width: 900px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 420px) { .grid { gap: 14px; } .card { min-height: 200px; padding: 26px 12px 22px; } .t { font-size: 1.15rem; } .d { font-size: .95rem; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div id="wrap"><div class="grid" id="grid"></div></div>
+
+<script>
+const OPTIONS = [
+  { id: "All Levels", c: "139,92,246", d: "Full mixed challenge",
+    icon: '<path d="M12 3 3 8l9 5 9-5-9-5Z"/><path d="m3 13 9 5 9-5"/>' },
+  { id: "Easy", c: "52,211,153", d: "Core concepts & definitions",
+    icon: '<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>' },
+  { id: "Medium", c: "251,191,36", d: "Applications & algorithms",
+    icon: '<path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"/>' },
+  { id: "Hard", c: "244,63,94", d: "Problem solving & state-space search",
+    icon: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/>' },
+];
+
+let selected = "All Levels";
+const grid = document.getElementById("grid");
+
+// --- Streamlit component protocol (no build tools needed) ---
+function send(type, data) {
+  window.parent.postMessage(Object.assign({ isStreamlitMessage: true, type: type }, data), "*");
+}
+function fit() { send("streamlit:setFrameHeight", { height: document.getElementById("wrap").offsetHeight }); }
+
+function build() {
+  grid.innerHTML = "";
+  OPTIONS.forEach(o => {
+    const b = document.createElement("button");
+    b.className = "card"; b.type = "button"; b.dataset.id = o.id; b.style.setProperty("--c", o.c);
+    b.setAttribute("aria-pressed", "false");
+    b.innerHTML =
+      '<span class="ck"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span>' +
+      '<span class="ic"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + o.icon + '</svg></span>' +
+      '<span class="t">' + o.id + '</span><span class="d">' + o.d.replace("&", "&amp;") + '</span>';
+    b.addEventListener("click", () => {
+      selected = o.id; paint();
+      send("streamlit:setComponentValue", { value: o.id, dataType: "json" });
+    });
+    grid.appendChild(b);
+  });
+  paint();
+}
+function paint() {
+  grid.querySelectorAll(".card").forEach(el => {
+    const on = el.dataset.id === selected;
+    el.classList.toggle("sel", on);
+    el.setAttribute("aria-pressed", on ? "true" : "false");
+  });
+}
+
+window.addEventListener("message", e => {
+  if (!e.data || e.data.type !== "streamlit:render") return;
+  const sel = e.data.args && e.data.args.selected;
+  if (sel) selected = sel;
+  if (!grid.children.length) build(); else paint();
+  fit();
+});
+
+new ResizeObserver(fit).observe(document.getElementById("wrap"));
+send("streamlit:componentReady", { apiVersion: 1 });
+</script>
+</body>
+</html>
