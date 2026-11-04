@@ -367,7 +367,7 @@ def _answer_match_ui(q, cur):
 # ------------------------------------------------------------------ page
 def render_quiz():
     page_frame()
-    st.markdown(QUIZ_CSS, unsafe_allow_html=True)
+    st.html(QUIZ_CSS)
 
     quiz, cur = st.session_state.get("quiz"), st.session_state.get("cur")
     if not quiz or not cur:                                    # e.g. page refreshed
