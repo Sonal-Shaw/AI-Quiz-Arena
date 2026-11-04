@@ -379,7 +379,7 @@ __GRAPH_CSS__
 def render_home():
       st.html(
     CSS.replace("__GRAPH_CSS__", GRAPH_CSS)
-)
+    )
     html(f'<div class="bgwrap">{circuit_background()}</div>')
 
     # 1. HERO
