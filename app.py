@@ -56,7 +56,7 @@ def html(block: str):
     """Render HTML safely: strip indentation/blank lines so Markdown never
     mistakes the block for a code fence."""
     clean = "\n".join(line.strip() for line in block.splitlines() if line.strip())
-    st.markdown(clean, unsafe_allow_html=True)
+    st.html(clean)
 
 
 def kf(name: str, start: float, hold_until: float) -> str:
