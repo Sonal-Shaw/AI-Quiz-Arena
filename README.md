@@ -40,6 +40,17 @@ The application aims to make learning Artificial Intelligence more engaging thro
 | CSS | Styling and visual design |
 | Pandas | Data handling |
 
+## 📸 Application Screenshots
+
+### Landing Page
+![Landing Page](landing_page%20(1).png)
+
+### Quiz Interface
+![Quiz Interface](question_page.png)
+
+### Results Page
+![Results Page](result_page.png)
+
 ## 📂 Project Structure
 
 ```text
