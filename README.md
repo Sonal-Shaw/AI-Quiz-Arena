@@ -43,7 +43,7 @@ The application aims to make learning Artificial Intelligence more engaging thro
 ## 📸 Application Screenshots
 
 ### Landing Page
-![Landing Page](landing_page%20(1).png)
+![Landing Page](landing_page(1).png)
 
 ### Quiz Interface
 ![Quiz Interface](question_page.png)
